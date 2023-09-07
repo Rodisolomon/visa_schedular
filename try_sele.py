@@ -3,8 +3,8 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys  
-import time
-
+import time, sched
+from typing import Callable
 
 def test(): 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install())) #need to install selenium and webdriver-manager
@@ -51,9 +51,15 @@ def nextdoor():
     time.sleep(1) #there's a change in postion if button, have to sleep
     post_publish = driver.find_element(By.XPATH, '//button[contains(@aria-label, "composer submit button")]')
     post_publish.click()
-    time.sleep(10)
+    time.sleep(3)
 
     driver.quit()   
 
+def run_function(scheduler:Callable, interval_in_sec:int, callable:Callable) -> None:
+    scheduler.enter(interval_in_sec, 1, run_function, (scheduler, interval_in_sec, callable))
+    callable()
 
-nextdoor()
+interval = 60
+scheduler = sched.scheduler(time.time, time.sleep)
+scheduler.enter(interval, 1, run_function, (scheduler, interval, nextdoor))
+scheduler.run()
