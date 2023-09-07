@@ -129,7 +129,8 @@ env.bak/
 venv.bak/
 .myenv
 myenv/
-
+./myenv/bin/python3
+./myenv/bin/python
 # Spyder project settings
 .spyderproject
 .spyproject
