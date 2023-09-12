@@ -5,8 +5,9 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys 
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 
+import csv
 import re
 import time, sched
 from datetime import datetime, timedelta
@@ -55,6 +56,8 @@ def run_function_wrapper(interval_in_sec:int, callable:Callable) -> None:
     scheduler.enter(interval_in_sec, 1, run_scheduled_function, (scheduler, interval_in_sec, callable))
     scheduler.run()
 
+
+
 class VisaAppointment():
     def __init__(self):
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install())) #need to install selenium and webdriver-manager
@@ -62,6 +65,7 @@ class VisaAppointment():
         self.logged_in: bool = False
         self.last_check_time: Optional[datetime] = None
         self.recent_available_dates: Dict[str, Optional[datetime]] = {city: None for city in GBV.CANADA_CITY_LIST}
+        self.recent_available_city: Optional[str] = None
 
 
     @classmethod
@@ -83,7 +87,13 @@ class VisaAppointment():
         formatted_datetime = date.strftime(format_string)
         return formatted_datetime
     
-    def get_recent_appointment_date(self, email_str: str, password_str: str) -> Optional[str]:
+    @classmethod
+    def str_to_datetime(self, date_str: str) -> datetime:
+        date_format = '%d %B, %Y'
+        return datetime.strptime(date_str, date_format)
+
+    
+    def get_user_recent_appointment_date(self, email_str: str, password_str: str, log_out = True) -> Optional[str]:
         """
         get recent appointment date of the user the structure of date, Month, Year
         used when 
@@ -91,16 +101,16 @@ class VisaAppointment():
         2. before reschedule, assert that current available date is earlier than user's appointment's
         """
         try:
-            if self.logged_in:
-                self.logout()
-            self.login(email_str, password_str)
+            if not self.logged_in:
+                self.login(email_str, password_str)
             apt_info = WebDriverWait(self.driver, 2).until(
                 EC.presence_of_element_located((By.XPATH, "//p[@class='consular-appt']"))
             )
             raw_str = apt_info.text
             date_pattern = r"\d{1,2}\s\w+,\s\d{4}"
             matched = re.search(date_pattern, raw_str)
-            self.logout()
+            if log_out:
+                self.logout()
             if matched:
                 return matched.group(0)
             else:
@@ -127,10 +137,9 @@ class VisaAppointment():
 
         base_url, _ = self.driver.current_url.rsplit('/', 1)
         self.driver.get(base_url + "/payment")
-
+        valid_city = False
         # Find all <tr> elements within the table
         table_rows = self.driver.find_elements(By.XPATH, "//table[@class='for-layout']//tr")
-
         # Iterate through the <tr> elements
         for row in table_rows:
             # Extract the <td> elements within the current row
@@ -141,10 +150,18 @@ class VisaAppointment():
                 # Check if the date text is valid
                 if ',' in date_text:
                     try:
-                        date_obj = datetime.strptime(date_text, '%d %B, %Y')
+                        date_obj = self.str_to_datetime(date_text)
                         self.recent_available_dates[city_name] = date_obj
+                        #compare, get the earliest one
+                        if self.recent_available_city == None or self.recent_available_dates[self.recent_available_city] > date_obj:
+                            self.recent_available_city = city_name
+                        valid_city = True
                     except ValueError:
+                        if self.recent_available_dates[city_name] != None:
+                            self.recent_available_dates[city_name] = None
                         pass
+        if not valid_city:
+            self.recent_available_city = None
         self.logout()
 
 
@@ -152,6 +169,8 @@ class VisaAppointment():
         """
         the function log into user account given password and user email into AIS system
         """
+        #make sure on the right page
+        self.driver.get("https://ais.usvisa-info.com/en-ca/niv/users/sign_in") 
         #account
         account = self.driver.find_element(By.XPATH, '//input[@type="email"]')
         account.send_keys(email_str)
@@ -161,7 +180,7 @@ class VisaAppointment():
         #checkbox
         checkbox = self.driver.find_element(By.ID, "policy_confirmed")
         actions = ActionChains(self.driver)
-        actions.move_to_element(checkbox).click().perform()
+        actions.click(checkbox).perform()
         #submit
         continue_button = self.driver.find_element(By.XPATH, '//input[@type="submit" and @name="commit"]')
         continue_button.submit()
@@ -175,18 +194,110 @@ class VisaAppointment():
         """
         navigate from front page to reschedule page
         """
+        print("start navigate")
         if not self.logged_in:
             return
+        print("keeo going")
         continue_button = self.driver.find_element(By.PARTIAL_LINK_TEXT, "Continue")
         continue_button.click()
-
         base_url, _ = self.driver.current_url.rsplit('/', 1)
         self.driver.get(base_url + "/appointment")
-        time.sleep(5)
-        self.driver.quit()
         
-    def reschedule(self) -> None:
-        if not self.logged_in or "appointment" not in self.driver.current_url:
+    def reschedule_for_a_user(self, email_str: str, password_str: str, csv_cur_apt_date_str: str) -> None:
+        """
+        reschedule a more recent appointment for user, only been called when this user is viable
+        """
+        self.login(email_str, password_str)
+        if not self.logged_in:
             return
+        #check if available date is same as the one in csv file
+        web_cur_apt_date = self.str_to_datetime(self.get_user_recent_appointment_date(email_str, password_str, log_out=False))
+        csv_cur_apt_date = self.str_to_datetime(csv_cur_apt_date_str)
+        if web_cur_apt_date != csv_cur_apt_date:
+            self.logout()
+            return
+        if not self.recent_available_city or not self.recent_available_dates[self.recent_available_city]:
+            self.logout()
+            return
+        
+        recent_available_date = self.recent_available_dates[self.recent_available_city]
+        #if recent_available_date < web_cur_apt_date:
+            #reschedule
+        self.navigate_to_scheduler()
+        #select city
+        dropdown_element = self.driver.find_element(By.ID, "appointments_consulate_appointment_facility_id")
+        dropdown = Select(dropdown_element)
+        dropdown.select_by_visible_text(self.recent_available_city)
+        #select date
+        time.sleep(2)
+        apt_button = self.driver.find_element(By.ID, "appointments_consulate_appointment_date")
+        self.driver.execute_script("arguments[0].click();", apt_button)
+        time.sleep(2)
+
+
+        day, month, year = recent_available_date.strftime("%d"), recent_available_date.strftime("%B"), recent_available_date.strftime("%Y")
+        target_month_year = month + year
+        prev_button_path = "//a[@class='ui-datepicker-prev]]"
+        group2 = self.driver.find_element(By.XPATH, "//div[@class='ui-datepicker-group']")
+        next_button_path = "//a[@data_handler='next']"
+        next_button = group2.find_element(By.XPATH, next_button_path)
+        selected_year = self.driver.find_element(By.XPATH, "//span[@class='ui-datepicker-year']").get_attribute("innerHTML")
+        selected_month = self.driver.find_element(By.XPATH, "//span[@class='ui-datepicker-month']").get_attribute("innerHTML")
+        selected_month_year = selected_month + selected_year
+        print(selected_month_year)
+        while selected_month_year != target_month_year:
+            time.sleep(1)
+            if (((int(year)) < int(selected_year))):
+                previous_click = self.driver.find_element(By.XPATH, prev_button_path)
+                previous_click.click()
+            else:    
+                next_button.click()
+
+            selected_year = self.driver.find_element(By.XPATH, "//span[@class='ui-datepicker-year']").text
+            selected_month = self.driver.find_element(By.XPATH, "//span[@class='ui-datepicker-month']").text
+            selected_month_year = selected_month + selected_year
+        
+        all = self.driver.find_element(By.XPATH, "//td[@data-month='{}' and @data-year='{}']//a".format(month, year))
+        for date_element in all:
+            date_text = date_element.text
+            if date_text == day:
+                date_element.click()
+                break
+        time.sleep(5)
+        #select time of appointment
+
+        #proceed
+        print("logout")
+        self.logout()
+
+
+
+    def send_success_email(self, email_str: str) -> None:
+        pass
+
+    
+    def reschedule_for_users(self) -> None:
+        """
+        wrapper function, check through all users for viability of reschedule, and call reschedule_for_a_user to update
+        check_recent_available_date wil always been called before this function 
+        """
+        # TODO: shuffle logic to ensure fairness
+        # Create an empty list to store the data
+        user_data = []
+        # Open the CSV file for reading
+        with open(GBV.CSV_FILE_PATH, 'r') as file:
+            csv_reader = csv.reader(file)
+            next(csv_reader, None)
+            for row in csv_reader:
+                user_data.append(row)
+
+us = "jszjosh@gmail.com" 
+pw = ".-Bj&JZ2WZC9N#s" 
+av_date = "8 February, 2024"
+eg = VisaAppointment()
+eg.recent_available_dates["Calgary"] = eg.str_to_datetime("10 September, 2024")
+eg.recent_available_city = "Calgary"
+time.sleep(5)
+eg.reschedule_for_a_user(us, pw, av_date)
         
         
