@@ -79,17 +79,23 @@ class VisaAppointment():
             return
 
     @classmethod
-    def datetime_to_str(self, date: datetime) -> str:
+    def datetime_to_str(self, date: datetime, no_date:bool = False) -> str:
         """
         return in the structure of date, Month, Year (eg. 8 February, 2024)
         """
-        format_string = "%d %B, %Y"
-        formatted_datetime = date.strftime(format_string)
+        if no_date:
+            date_format = "%B %Y"
+        else:
+            date_format = '%d %B, %Y'
+        formatted_datetime = date.strftime(date_format)
         return formatted_datetime
     
     @classmethod
-    def str_to_datetime(self, date_str: str) -> datetime:
-        date_format = '%d %B, %Y'
+    def str_to_datetime(self, date_str: str, no_date:bool = False) -> datetime:
+        if no_date:
+            date_format = "%B %Y"
+        else:
+            date_format = '%d %B, %Y'
         return datetime.strptime(date_str, date_format)
 
     
@@ -224,50 +230,51 @@ class VisaAppointment():
         #if recent_available_date < web_cur_apt_date:
             #reschedule
         self.navigate_to_scheduler()
+
         #select city
         dropdown_element = self.driver.find_element(By.ID, "appointments_consulate_appointment_facility_id")
         dropdown = Select(dropdown_element)
         dropdown.select_by_visible_text(self.recent_available_city)
-        #select date
-        time.sleep(2)
+
+        #select right year+month+date
+        time.sleep(1)
         apt_button = self.driver.find_element(By.ID, "appointments_consulate_appointment_date")
         self.driver.execute_script("arguments[0].click();", apt_button)
-        time.sleep(2)
-
-
+        time.sleep(1)
         day, month, year = recent_available_date.strftime("%d"), recent_available_date.strftime("%B"), recent_available_date.strftime("%Y")
-        target_month_year = month + year
-        prev_button_path = "//a[@class='ui-datepicker-prev]]"
-        group2 = self.driver.find_element(By.XPATH, "//div[@class='ui-datepicker-group']")
-        next_button_path = "//a[@data_handler='next']"
+        target_month_year = self.str_to_datetime(month + " " + year, no_date=True)
+        time.sleep(1)
+        group2 = self.driver.find_element(By.XPATH, "//div[@class='ui-datepicker-group ui-datepicker-group-last']")
+        next_button_path = "//a[@class='ui-datepicker-next ui-corner-all']"
+        next_button_selected_path = "//a[@class='ui-datepicker-next ui-corner-all ui-state-hover ui-datepicker-next-hover']"
         next_button = group2.find_element(By.XPATH, next_button_path)
-        selected_year = self.driver.find_element(By.XPATH, "//span[@class='ui-datepicker-year']").get_attribute("innerHTML")
-        selected_month = self.driver.find_element(By.XPATH, "//span[@class='ui-datepicker-month']").get_attribute("innerHTML")
-        selected_month_year = selected_month + selected_year
-        print(selected_month_year)
-        while selected_month_year != target_month_year:
-            time.sleep(1)
-            if (((int(year)) < int(selected_year))):
-                previous_click = self.driver.find_element(By.XPATH, prev_button_path)
-                previous_click.click()
-            else:    
-                next_button.click()
 
-            selected_year = self.driver.find_element(By.XPATH, "//span[@class='ui-datepicker-year']").text
-            selected_month = self.driver.find_element(By.XPATH, "//span[@class='ui-datepicker-month']").text
-            selected_month_year = selected_month + selected_year
+        selected_year = group2.find_element(By.XPATH, "//span[@class='ui-datepicker-year']").get_attribute("innerHTML")
+        selected_month = group2.find_element(By.XPATH, "//span[@class='ui-datepicker-month']").get_attribute("innerHTML")
+        selected_month_year = self.str_to_datetime(selected_month + " " + selected_year, no_date=True)
+        while selected_month_year < target_month_year:
+            next_button.click()
+            time.sleep(1) 
+            group2 = self.driver.find_element(By.XPATH, "//div[@class='ui-datepicker-group ui-datepicker-group-last']")
+            next_button = group2.find_element(By.XPATH, next_button_selected_path)
+            selected_year = group2.find_element(By.XPATH, "//span[@class='ui-datepicker-year']").get_attribute("innerHTML")
+            selected_month = group2.find_element(By.XPATH, "//span[@class='ui-datepicker-month']").get_attribute("innerHTML")
+            selected_month_year = self.str_to_datetime(selected_month + " " + selected_year, no_date=True)
         
-        all = self.driver.find_element(By.XPATH, "//td[@data-month='{}' and @data-year='{}']//a".format(month, year))
-        for date_element in all:
-            date_text = date_element.text
-            if date_text == day:
-                date_element.click()
-                break
-        time.sleep(5)
+        #find date
+        all = group2.find_elements(By.XPATH, "//td[@data-month='{}' and @data-year='{}']".format(target_month_year.month, year))
+        for parent_element in all:
+            for date_element in parent_element.find_elements(By.TAG_NAME, "a"):
+                date_text = date_element.get_attribute("innerHTML")
+                if date_text == day:
+                    date_element.click()
+                    break
+        time.sleep(1)
         #select time of appointment
-
+        dropdown_element = self.driver.find_element(By.ID, "appointments_consulate_appointment_time")
+        dropdown = Select(dropdown_element)
+        dropdown.select_by_index(1)
         #proceed
-        print("logout")
         self.logout()
 
 
@@ -297,7 +304,6 @@ av_date = "8 February, 2024"
 eg = VisaAppointment()
 eg.recent_available_dates["Calgary"] = eg.str_to_datetime("10 September, 2024")
 eg.recent_available_city = "Calgary"
-time.sleep(5)
 eg.reschedule_for_a_user(us, pw, av_date)
         
         
