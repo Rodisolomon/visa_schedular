@@ -8,6 +8,7 @@ def add_user_csv(email, password) -> None:
     add new user to user_data.csv file, with row email, password, current_appointment_date
     """
     new_web_client = web_api.VisaAppointment()
+    new_web_client.login(email, password)
     recent_date_str = new_web_client.get_recent_appointment_date(email, password)
     try:
         with open(GBV.CSV_FILE_PATH, 'r', newline='') as file:

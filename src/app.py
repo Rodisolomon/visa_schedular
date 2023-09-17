@@ -1,5 +1,6 @@
 from flask import Flask
 import visit
+from global_variables import CHECK_INTERVAL_IN_SEC
 
 app = Flask(__name__)
 @app.route("/")
@@ -8,7 +9,7 @@ def index():
 
 @app.route('/visit_nd')
 def call_nd():
-    visit.run_function_wrapper(60, visit.nextdoor)
+    visit.run_function_wrapper(CHECK_INTERVAL_IN_SEC, visit.nextdoor)
 
 if __name__ == "__main__":
     app.run()
