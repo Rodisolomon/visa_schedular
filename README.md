@@ -5,10 +5,11 @@ Introduction:
     This is an automatic scheduler for US visa interview appointment. We use a separate account to check most recent available visa appointment date in certain frequency, and store user data in a separate CSV file. Once there exist appointment date earlier than user's current appointment date, we log into user's account and do the reschedule.
 
 Module Structure:
-    data_update.py:
-        add new user data to the csv file by following below command:
+
+    # data_update.py:
+        # add new user data to the csv file by following below command:
         add_user_csv(email_str, password_str)
-        This function will create a new "visa_users.csv" file one level above the github repo by default, you can also specify the directory
+        # This function will create a new "visa_users.csv" file one level above the github repo by default, you can also specify the directory
 
     # web_api.py:
         # to run the whole auto-scheduler manually, please make sure you've already created the csv file using data_update.py and import both module into a new python file.
