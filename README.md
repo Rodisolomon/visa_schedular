@@ -14,13 +14,14 @@ We use Selenium for the interaction with webpage.
     # This function will create a new "visa_users.csv" file one level above the github repo by default, you can also specify the directory
 
 # web_api.py:
-# to run the whole auto-scheduler manually, please make sure you've already created the csv file using data_update.py and import both module into a new python file.
-eg = web_api.VisaAppointment()
-eg.check_recent_available_date() 
-# then you can either
-eg.reschedule_for_users()
-# or test it for a single user if you know those information of a user.
-eg.reschedule_for_a_user(user_name, password, available_date)
+    # to run the whole auto-scheduler manually, please make sure you've already created the csv file using data_update.py and import both module into a new python file.
+    eg = web_api.VisaAppointment()
+    eg.check_recent_available_date()
+
+    # then you can either
+    eg.reschedule_for_users()
+    # or test it for a single user if you know those information of a user.
+    eg.reschedule_for_a_user(user_name, password, available_date)
             
 
 # global_variable.py:
