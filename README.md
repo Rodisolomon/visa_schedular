@@ -1,10 +1,10 @@
 # U.S. visa interview appointment auto-scheduler
 *Task yet to be done is marked as #TODO
 
-Introduction:
+##Introduction:
     This is an automatic scheduler for US visa interview appointment. We use a separate account to check most recent available visa appointment date in certain frequency, and store user data in a separate CSV file. Once there exist appointment date earlier than user's current appointment date, we log into user's account and do the reschedule.
 
-Module Structure:
+##Module Structure:
     ```Python3
     # data_update.py:
         # add new user data to the csv file by following below command:
@@ -23,13 +23,13 @@ Module Structure:
 
     # global_variable.py:
         # you can change city list, appointment check interval variables in this file
-    ```
+    ```Python3
 
-Initiation:
+##Initiation:
     after git pull, run 'pip install -r requirements.txt' to install required package
 
 
-How to run the script:
+##How to run the script:
     in the web_script directory, run "python app.py" to start the script. It'll keep running after that.
     If you want to manually test with web_api, please follow commans under web_api.py section above.
 
