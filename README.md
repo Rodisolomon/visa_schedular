@@ -28,12 +28,16 @@ This is an automatic scheduler for US visa interview appointment. We use a separ
 
 ## Initiation:
 
-after git pull, run 'pip install -r requirements.txt' to install required package
+after git pull, run 
+```pip install -r requirements.txt```
+to install required package
 
 
 ## How to run the script:
 
-in the web_script directory, run "python app.py" to start the script. It'll keep running after that.
+in the web_script directory, run 
+```python app.py```
+to start the script. It'll keep running after that.
 If you want to manually test with web_api, please follow commans under web_api.py section above.
 
 
