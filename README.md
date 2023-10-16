@@ -25,7 +25,7 @@ Module Structure:
         # you can change city list, appointment check interval variables in this file
 
 Initiation:
-    after git pull, run pip install -r requirements.txt to install required package
+    after git pull, run 'pip install -r requirements.txt' to install required package
 
 
 How to run the script:
