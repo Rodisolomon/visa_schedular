@@ -6,23 +6,23 @@ Introduction:
 
 Module Structure:
 
-    data_update.py:
+    # data_update.py:
         add new user data to the csv file by following below command:
         add_user_csv(email_str, password_str)
-        This function will create a new "visa_users.csv" file one level above the github repo by default, you can also specify the directory
+        # This function will create a new "visa_users.csv" file one level above the github repo by default, you can also specify the directory
 
-    web_api.py:
-        to run the whole auto-scheduler manually, please make sure you've already created the csv file using data_update.py and import both module into a new python file.
+    # web_api.py:
+        # to run the whole auto-scheduler manually, please make sure you've already created the csv file using data_update.py and import both module into a new python file.
             eg = web_api.VisaAppointment()
             eg.check_recent_available_date() 
-            then you can either
+            # then you can either
                 eg.reschedule_for_users()
-            or 
+            # or 
                 eg.reschedule_for_a_user(user_name, password, available_date)
                 if you know those information of a user.
 
-    global_variable.py:
-        you can change city list, appointment check interval variables in this file
+    # global_variable.py:
+        # you can change city list, appointment check interval variables in this file
 
 Initiation:
     after git pull, run pip install -r requirements.txt to install required package
