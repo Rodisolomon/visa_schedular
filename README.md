@@ -24,7 +24,7 @@ This is an automatic scheduler for US visa interview appointment. We use a separ
 
 # global_variable.py:
     # you can change city list, appointment check interval variables in this file
-```Python3
+```
 
 ## Initiation:
 
