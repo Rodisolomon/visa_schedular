@@ -6,10 +6,8 @@ Introduction:
 
 Module Structure:
     data_update.py:
-    """
         add new user data to the csv file by following below command:
         add_user_csv(email_str, password_str)
-    """
         This function will create a new "visa_users.csv" file one level above the github repo by default, you can also specify the directory
 
     # web_api.py:
