@@ -1,5 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![prettier version](https://img.shields.io/badge/prettier-4.0.1-brightgreen)
+![Selenium](https://img.shields.io/badge/Selenium-%2343B02A?style=for-the-badge&logo=selenium&logoColor=white)
 
 
 # U.S. visa interview appointment auto-scheduler
