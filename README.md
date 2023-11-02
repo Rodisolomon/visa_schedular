@@ -1,3 +1,6 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+
 # U.S. visa interview appointment auto-scheduler
 *Task yet to be done is marked as #TODO
 
