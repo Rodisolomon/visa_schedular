@@ -156,7 +156,7 @@ class VisaAppointment():
                         pass
         if not valid_city:
             self.recent_available_city = None
-        print(f"after the check, recent available city is {self.recent_available_city} with date {self.recent_available_dates[self.recent_available_city]}")
+        # print(f"after the check, recent available city is {self.recent_available_city} with date {self.recent_available_dates[self.recent_available_city]}")
         self.logout()
 
 
