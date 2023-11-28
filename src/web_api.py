@@ -13,6 +13,7 @@ import time, sched
 from datetime import datetime, timedelta
 from typing import Callable, Optional, Dict
 import global_variables as GBV
+import os
 
 
 def run_scheduled_function(scheduler:Callable, interval_in_sec:int, callable:Callable) -> None:
@@ -34,6 +35,7 @@ class VisaAppointment():
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install())) #need to install selenium and webdriver-manager
         self.driver.get("https://ais.usvisa-info.com/en-ca/niv/users/sign_in") 
         if not file_path:
+            current_directory = os.getcwd()
             parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
             grandparent_directory = os.path.abspath(os.path.join(parent_directory, os.pardir))
             file_path = grandparent_directory + "/visa_users.csv"
@@ -117,7 +119,7 @@ class VisaAppointment():
         if not self.logged_in:
             return
         
-        time.sleep(1)
+        time.sleep(3)
         continue_button = self.driver.find_element(By.PARTIAL_LINK_TEXT, "Continue")
         continue_button.click()
 
@@ -148,6 +150,8 @@ class VisaAppointment():
                         pass
         if not valid_city:
             self.recent_available_city = None
+        print(f"after the check, recent available city is {self.recent_available_city} with date {self.recent_available_dates[self.recent_available_city]}")
+        time.sleep(3)
         self.logout()
 
 

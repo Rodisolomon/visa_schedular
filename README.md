@@ -43,8 +43,13 @@ in the web_script directory, run
 ```
 python app.py
 ```
-to start the script. It'll keep running after that.
-If you want to manually test with web_api, please follow commans under web_api.py section above.
+to start the script. It'll keep running after that. Open the web address provided by flask with "/visit" to initiate the checking program
+to kill the process/restart run 
+```
+lsof -i :5000
+kill -9 <PID>
+```
+If you want to manually test with web_api, please follow commands under web_api.py section above.
 
 
 
