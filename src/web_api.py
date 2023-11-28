@@ -119,7 +119,7 @@ class VisaAppointment():
         if not self.logged_in:
             return
         
-        time.sleep(3)
+        time.sleep(5)
         continue_button = self.driver.find_element(By.PARTIAL_LINK_TEXT, "Continue")
         continue_button.click()
 
@@ -151,7 +151,6 @@ class VisaAppointment():
         if not valid_city:
             self.recent_available_city = None
         print(f"after the check, recent available city is {self.recent_available_city} with date {self.recent_available_dates[self.recent_available_city]}")
-        time.sleep(3)
         self.logout()
 
 
