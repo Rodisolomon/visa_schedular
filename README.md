@@ -1,7 +1,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Selenium](https://img.shields.io/badge/Selenium-%43B02A?style=for-the-badge&logo=selenium&logoColor=white)](https://www.selenium.dev/documentation/overview/)
-
-
+![example workflow](https://github.com/Rodisolomon/visa_schedular/blob/main/.github/workflows/python-app.yml/badge.svg)
 
 # U.S. visa interview appointment auto-scheduler
 *Task yet to be done is marked as #TODO
@@ -12,6 +11,9 @@ This is an automatic scheduler for US visa interview appointment. We use a separ
 We use Selenium for the interaction with webpage.
 
 ## Module Structure:
+
+![design]([URL_of_the_image](https://github.com/Rodisolomon/visa_schedular/blob/main/visa%20schedular%20flow%20chart.png))
+
 ```Python3
 # data_update.py:
     # add new user data to the csv file by following below command:
