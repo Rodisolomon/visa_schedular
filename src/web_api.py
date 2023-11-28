@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -32,7 +33,12 @@ def run_function_wrapper(interval_in_sec:int, callable:Callable) -> None:
 
 class VisaAppointment():
     def __init__(self, file_path = None):
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install())) #need to install selenium and webdriver-manager
+        self.chrome_options = Options()
+        self.chrome_options.add_argument("--headless")
+        self.chrome_options.add_argument("--no-sandbox") # Recommended for running in CI/CD environments
+        self.chrome_options.add_argument("--disable-dev-shm-usage") # Overcome limited resource problems
+
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=self.chrome_options) #need to install selenium and webdriver-manager
         self.driver.get("https://ais.usvisa-info.com/en-ca/niv/users/sign_in") 
         if not file_path:
             current_directory = os.getcwd()
@@ -159,21 +165,24 @@ class VisaAppointment():
         the function log into user account given password and user email into AIS system
         """
         #make sure on the right page
-        self.driver.get("https://ais.usvisa-info.com/en-ca/niv/users/sign_in") 
-        #account
-        account = self.driver.find_element(By.XPATH, '//input[@type="email"]')
-        account.send_keys(email_str)
-        #password
-        password = self.driver.find_element(By.XPATH, '//input[@type="password"]')
-        password.send_keys(password_str)
-        #checkbox
-        checkbox = self.driver.find_element(By.ID, "policy_confirmed")
-        actions = ActionChains(self.driver)
-        actions.click(checkbox).perform()
-        #submit
-        continue_button = self.driver.find_element(By.XPATH, '//input[@type="submit" and @name="commit"]')
-        continue_button.submit()
-        self.logged_in = True
+        try:
+            self.driver.get("https://ais.usvisa-info.com/en-ca/niv/users/sign_in") 
+            #account
+            account = self.driver.find_element(By.XPATH, '//input[@type="email"]')
+            account.send_keys(email_str)
+            #password
+            password = self.driver.find_element(By.XPATH, '//input[@type="password"]')
+            password.send_keys(password_str)
+            #checkbox
+            checkbox = self.driver.find_element(By.ID, "policy_confirmed")
+            actions = ActionChains(self.driver)
+            actions.click(checkbox).perform()
+            #submit
+            continue_button = self.driver.find_element(By.XPATH, '//input[@type="submit" and @name="commit"]')
+            continue_button.submit()
+            self.logged_in = True
+        except:
+            print("log in not successful, please restart the process")
 
     def logout(self) -> None:
         self.driver.get("https://ais.usvisa-info.com/en-ca/niv/users/sign_out")
