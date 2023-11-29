@@ -51,6 +51,7 @@ in the web_script directory, run
 python app.py
 ```
 to start the script. It'll keep running after that. Open the web address provided by flask with "/visit" to initiate the checking program
+
 to kill the process/restart run 
 ```
 lsof -i :5000
