@@ -1,6 +1,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Status](https://github.com/Rodisolomon/visa_schedular/actions/workflows/python-app.yml/badge.svg)
 [![Selenium](https://img.shields.io/badge/Selenium-%43B02A?style=for-the-badge&logo=selenium&logoColor=white)](https://www.selenium.dev/documentation/overview/)
-![example workflow](https://github.com/Rodisolomon/visa_schedular/blob/main/.github/workflows/python-app.yml/badge.svg)
 
 # U.S. visa interview appointment auto-scheduler
 *Task yet to be done is marked as #TODO
@@ -12,7 +12,7 @@ We use Selenium for the interaction with webpage.
 
 ## Module Structure:
 
-![design]([URL_of_the_image](https://github.com/Rodisolomon/visa_schedular/blob/main/visa%20schedular%20flow%20chart.png))
+![design](https://github.com/Rodisolomon/visa_schedular/blob/main/visa%20schedular%20flow%20chart.png)
 
 ```Python3
 # data_update.py:
@@ -51,6 +51,7 @@ in the web_script directory, run
 python app.py
 ```
 to start the script. It'll keep running after that. Open the web address provided by flask with "/visit" to initiate the checking program
+
 to kill the process/restart run 
 ```
 lsof -i :5000
