@@ -266,7 +266,6 @@ class VisaAppointment():
             dropdown_element = self.driver.find_element(By.ID, "appointments_consulate_appointment_time")
             dropdown = Select(dropdown_element)
             dropdown.select_by_index(1)
-            ### TODO: proceed and confirm the reschedule
         self.logout()
 
 
